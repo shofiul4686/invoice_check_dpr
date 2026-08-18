@@ -304,10 +304,10 @@
         }
         .print-view-table th, .print-view-table td {
             border: 1px solid #000;
-            /* প্রিন্ট করার সময় কলাম ফিট করার জন্য প্যাডিং এবং ফন্ট সাইজ কমানো হয়েছে */
-            padding: 3px 5px; /* প্যাডিং আরও কমানো হয়েছে */
+            /* প্রিন্ট করার সময় কলাম ফিট করার জন্য প্যাডিং এবং ফন্ট সাইজ কমানো হয়েছে */
+            padding: 3px 5px; /* প্যাডিং আরও কমানো হয়েছে */
             text-align: left;
-            font-size: 7.5pt; /* ফন্ট সাইজ আরও কমানো হয়েছে */
+            font-size: 7.5pt; /* ফন্ট সাইজ আরও কমানো হয়েছে */
             white-space: normal;
         }
         .print-view-table thead th {
@@ -350,14 +350,14 @@
             
             @page {
                 size: A4 landscape; 
-                /* ⭐ পরিবর্তন ১: মার্জিন বাড়ানো হলো (উপরে ও নিচে) */
+                /* ⭐ পরিবর্তন ১: মার্জিন বাড়ানো হলো (উপরে ও নিচে) */
                 margin: 15mm; 
             }
             
             /* হেডার সেকশনটি শুধুমাত্র প্রথম পেজেই থাকবে, দ্বিতীয় পেজ থেকে শুধু টেবিলের কলামের নাম রিপিট হবে */
             .print-header-container {
                 page-break-after: avoid; 
-                /* ⭐ পরিবর্তন ২: হেডারের নিচে মার্জিন বাড়ানো হলো */
+                /* ⭐ পরিবর্তন ২: হেডারের নিচে মার্জিন বাড়ানো হলো */
                 margin-bottom: 20px; 
             }
             
@@ -712,8 +712,9 @@
                             return;
                         }
                         const rowsAdded = await addRowsToFirebase(rows);
-                        showStatusMessage(`ডেটা সফলভাবে যোগ করা হয়েছে। মোট ${rowsAdded} টি নতুন সারি যুক্ত হয়েছে। (রিয়েল-টাইমে টেবিলে দেখা যাবে)`, false);
-                        // রিয়েল-টাইম স্ট্রিম স্বয়ংক্রিয়ভাবে নতুন সারিগুলো টেবিলে দেখাবে, তাই আলাদাভাবে re-fetch করার দরকার নেই
+                        showStatusMessage(`ডেটা সফলভাবে যোগ করা হয়েছে। মোট ${rowsAdded} টি নতুন সারি যুক্ত হয়েছে।`, false);
+                        // পরবর্তী পোলিং সাইকেলে নতুন সারি স্বয়ংক্রিয়ভাবে দেখা যাবে; দ্রুত দেখতে এখনই একবার রিফ্রেশ করা হচ্ছে
+                        fetchDataOnce();
                     } catch (error) {
                         showStatusMessage(`CSV ডেটা যোগ করতে সমস্যা হয়েছে: ${error.message}`, true);
                     } finally {
@@ -746,33 +747,89 @@
                 }, 4000);
             }
 
+            const MONTH_NAME_MAP = {
+                'JAN': 0, 'FEB': 1, 'MAR': 2, 'APR': 3, 'MAY': 4, 'JUN': 5,
+                'JUL': 6, 'AUG': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DEC': 11
+            };
+            const MONTH_NAMES_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+            // বিভিন্ন সোর্স (CSV, Firebase, ম্যানুয়াল এন্ট্রি) থেকে আসা ভিন্ন ভিন্ন ফরম্যাটের ডেট স্ট্রিং/সংখ্যা পার্স করে
             function parseDateString(dateValue) {
-                if (typeof dateValue !== 'string' || !dateValue) {
+                if (dateValue === null || dateValue === undefined || dateValue === '') {
                     return null;
                 }
-                const dateStr = dateValue.trim().toUpperCase();
-                const parts = dateStr.split('-');
-                if (parts.length === 3) {
-                    const day = parseInt(parts[0], 10);
-                    const monthMap = {
-                        'JAN': 0, 'FEB': 1, 'MAR': 2, 'APR': 3, 'MAY': 4, 'JUN': 5,
-                        'JUL': 6, 'AUG': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DEC': 11
-                    };
-                    const month = monthMap[parts[1]];
-                    let year = parseInt(parts[2], 10);
+                if (dateValue instanceof Date) {
+                    return isNaN(dateValue.getTime()) ? null : dateValue;
+                }
 
-                    if (month !== undefined && !isNaN(day) && !isNaN(year)) {
-                        if (year < 100) {
-                            year += (year > 50) ? 1900 : 2000;
-                        }
-                        const date = new Date(year, month, day);
-                        
-                        if (date.getDate() === day && date.getMonth() === month && date.getFullYear() === year) {
-                            return date;
-                        }
+                const rawStr = String(dateValue).trim();
+                if (!rawStr) return null;
+
+                // Excel সিরিয়াল ডেট নম্বর (যেমন 45678) — CSV এক্সপোর্টে মাঝে মাঝে দেখা যায়
+                if (/^\d+(\.\d+)?$/.test(rawStr)) {
+                    const serial = parseFloat(rawStr);
+                    if (serial > 20000 && serial < 90000) {
+                        const excelEpoch = Date.UTC(1899, 11, 30);
+                        const d = new Date(excelEpoch + serial * 86400000);
+                        if (!isNaN(d.getTime())) return d;
                     }
                 }
+
+                const dateStr = rawStr.toUpperCase();
+
+                // DD-MON-YYYY / DD MON YYYY / DD.MON.YYYY (যেমন 01-JAN-24, 1 Jan 2024)
+                let m = dateStr.match(/^(\d{1,2})[\-\/\.\s]+([A-Z]{3,})[\-\/\.\s]+(\d{2,4})$/);
+                if (m) {
+                    const day = parseInt(m[1], 10);
+                    const month = MONTH_NAME_MAP[m[2].substring(0, 3)];
+                    let year = parseInt(m[3], 10);
+                    if (month !== undefined && !isNaN(day) && !isNaN(year)) {
+                        if (year < 100) year += (year > 50) ? 1900 : 2000;
+                        const d = new Date(year, month, day);
+                        if (d.getDate() === day && d.getMonth() === month && d.getFullYear() === year) return d;
+                    }
+                }
+
+                // YYYY-MM-DD / YYYY/MM/DD (ISO স্টাইল, সময় থাকলেও ঠিক আছে)
+                m = dateStr.match(/^(\d{4})[\-\/](\d{1,2})[\-\/](\d{1,2})/);
+                if (m) {
+                    const year = parseInt(m[1], 10);
+                    const month = parseInt(m[2], 10) - 1;
+                    const day = parseInt(m[3], 10);
+                    const d = new Date(year, month, day);
+                    if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) return d;
+                }
+
+                // DD-MM-YYYY / DD/MM/YYYY (সংখ্যায় লেখা তারিখ)
+                m = dateStr.match(/^(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{2,4})$/);
+                if (m) {
+                    let day = parseInt(m[1], 10);
+                    let month = parseInt(m[2], 10) - 1;
+                    let year = parseInt(m[3], 10);
+                    if (year < 100) year += (year > 50) ? 1900 : 2000;
+                    // মাসের ঘরে ১২-এর বেশি সংখ্যা থাকলে (MM-DD-YYYY ফরম্যাট ধরে নিয়ে) দিন/মাস অদল-বদল করে দেখা হয়
+                    if (month > 11 && day <= 12) {
+                        const tmp = day; day = month + 1; month = tmp - 1;
+                    }
+                    const d = new Date(year, month, day);
+                    if (!isNaN(d.getTime()) && d.getMonth() === month && d.getDate() === day) return d;
+                }
+
+                // সবশেষে ব্রাউজারের নেটিভ পার্সার দিয়ে চেষ্টা (যেমন "Jan 1, 2024", পূর্ণ ISO টাইমস্ট্যাম্প ইত্যাদি)
+                const nativeParsed = new Date(rawStr);
+                if (!isNaN(nativeParsed.getTime())) {
+                    return nativeParsed;
+                }
+
                 return null;
+            }
+
+            // পার্স করা Date-কে সবসময় একই, পড়া-সহজ ফরম্যাটে (DD-MON-YYYY) দেখানোর জন্য
+            function formatDateForDisplay(date) {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = MONTH_NAMES_SHORT[date.getMonth()];
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
             }
 
             function customSort(a, b) {
@@ -845,7 +902,7 @@
                     const tbody = table.getElementsByTagName('tbody')[0];
 
                     if (tbody.rows.length === 0 || table.style.display === 'none') {
-                        showStatusMessage('প্রিন্ট করার জন্য কোনো ডেটা নেই বা টেবিলটি লোড হয়নি।', true);
+                        showStatusMessage('প্রিন্ট করার জন্য কোনো ডেটা নেই বা টেবিলটি লোড হয়নি।', true);
                         return;
                     }
                     
@@ -884,7 +941,7 @@
                         <style>
                             @page { 
                                 size: A4 landscape; 
-                                /* গ্লোবাল প্রিন্ট মার্জিন বাড়ানো হয়েছে */
+                                /* গ্লোবাল প্রিন্ট মার্জিন বাড়ানো হয়েছে */
                                 margin: 15mm; 
                             }
                             body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -897,7 +954,7 @@
                             }
                             .print-header-container {
                                 page-break-after: avoid; 
-                                /* হেডারের নিচে মার্জিন বাড়ানো হয়েছে */
+                                /* হেডারের নিচে মার্জিন বাড়ানো হয়েছে */
                                 margin-bottom: 20px; 
                             }
                             .print-view-table th, .print-view-table td {
@@ -1077,6 +1134,42 @@
             }
             // --- End Reverted Print Function ---
 
+            function buildStatusSelect(cellData, originalRowIndex, originalColIndex) {
+                const selectElement = document.createElement('select');
+                selectElement.dataset.originalRowIndex = originalRowIndex;
+                selectElement.dataset.originalColIndex = originalColIndex;
+
+                const trimmedLowercasedCellData = String(cellData || '').trim().toLowerCase();
+
+                let currentOptions = [...statusEditableOptions];
+                if (trimmedLowercasedCellData !== 'ok' && trimmedLowercasedCellData !== '') {
+                    if (!currentOptions.some(opt => String(opt).toLowerCase() === trimmedLowercasedCellData)) {
+                        currentOptions.push(cellData);
+                    }
+                }
+
+                currentOptions.sort((a, b) => {
+                    const aLower = String(a).toLowerCase();
+                    const bLower = String(b).toLowerCase();
+                    if (aLower === 'ok') return -1;
+                    if (bLower === 'ok') return 1;
+                    if (a === '') return -1;
+                    if (b === '') return 1;
+                    return aLower.localeCompare(bLower);
+                });
+
+                currentOptions.forEach(optionText => {
+                    const option = document.createElement('option');
+                    option.value = optionText;
+                    option.textContent = optionText === '' ? 'Select Status' : optionText;
+                    option.selected = (optionText === cellData);
+                    selectElement.appendChild(option);
+                });
+                selectElement.value = cellData;
+                selectElement.addEventListener('change', handleDropdownChange);
+                return selectElement;
+            }
+
             function renderTableBody(dataToRender) {
                 const tableBody = document.getElementById('invoiceDataTable').getElementsByTagName('tbody')[0];
                 const loadingMessage = document.getElementById('loading');
@@ -1153,6 +1246,14 @@
                                 cell.appendChild(buildStatusSelect(cellData, originalRowIndex, originalColIndex));
                             }
                         }
+                        else if (originalColIndex === 4) {
+                            // Date কলাম: ভিন্ন ভিন্ন সোর্স থেকে আসা ফরম্যাট পার্স করে একই স্ট্যান্ডার্ড ফরম্যাটে দেখানো হয়
+                            const parsedDate = parseDateString(rawCellData);
+                            cell.textContent = parsedDate ? formatDateForDisplay(parsedDate) : (cellData || '—');
+                            if (!parsedDate && cellData) {
+                                cell.title = 'তারিখের ফরম্যাট চেনা যায়নি, মূল মান দেখানো হচ্ছে';
+                            }
+                        }
                         else {
                             cell.textContent = cellData;
                         }
@@ -1162,9 +1263,12 @@
                 dataTable.style.display = 'table';
             }
 
-            // --- রিয়েল-টাইম সিঙ্ক (Firebase REST API স্ট্রিমিং, Server-Sent Events) ---
+            // --- ডেটা সিঙ্ক: fetch() দিয়ে প্রতি ১৫ সেকেন্ডে পোলিং (EventSource/SSE ছাড়া) ---
             let firebaseDataMap = {}; // Firebase key -> row object, লোকাল মিরর
-            let realtimeEventSource = null;
+            const POLL_INTERVAL_MS = 15000; // ১৫ সেকেন্ড
+            let pollTimer = null;
+            let isFetching = false;
+            let hasLoadedOnce = false;
 
             function rebuildOriginalDataFromMap() {
                 const items = Object.keys(firebaseDataMap).map(key => ({
@@ -1173,34 +1277,6 @@
                 }));
                 originalData = items;
                 originalData.sort(customSort);
-            }
-
-            // Firebase থেকে আসা 'put' (সম্পূর্ণ প্রতিস্থাপন) বা 'patch' (আংশিক আপডেট) ইভেন্ট লোকাল মিররে প্রয়োগ করে
-            function applyRealtimeEvent(eventType, pathStr, data) {
-                if (pathStr === '/') {
-                    if (eventType === 'put') {
-                        firebaseDataMap = data || {};
-                    } else if (data) {
-                        Object.keys(data).forEach(key => {
-                            if (data[key] === null) {
-                                delete firebaseDataMap[key];
-                            } else {
-                                firebaseDataMap[key] = { ...(firebaseDataMap[key] || {}), ...data[key] };
-                            }
-                        });
-                    }
-                } else {
-                    const key = pathStr.replace(/^\//, '').split('/')[0];
-                    if (eventType === 'put') {
-                        if (data === null) {
-                            delete firebaseDataMap[key];
-                        } else {
-                            firebaseDataMap[key] = data;
-                        }
-                    } else if (data) {
-                        firebaseDataMap[key] = { ...(firebaseDataMap[key] || {}), ...data };
-                    }
-                }
             }
 
             function refreshUIFromLocalData(isInitialLoad) {
@@ -1220,42 +1296,50 @@
                 }
             }
 
-            function startRealtimeSync() {
-                let receivedInitialData = false;
+            async function fetchDataOnce() {
+                // কোনো ড্রপডাউন এডিট/সেভ চলাকালীন বা আগের ফেচ শেষ না হলে স্কিপ করা হবে,
+                // যাতে ইউজারের কাজের মাঝখানে টেবিল রিফ্রেশ হয়ে বিঘ্ন না ঘটায়
+                if (isFetching || document.querySelector('.editable-cell select:disabled')) {
+                    return;
+                }
+                isFetching = true;
                 try {
-                    realtimeEventSource = new EventSource(firebaseUrl(''));
-
-                    realtimeEventSource.addEventListener('put', function(e) {
-                        try {
-                            const parsed = JSON.parse(e.data);
-                            applyRealtimeEvent('put', parsed.path, parsed.data);
-                            refreshUIFromLocalData(!receivedInitialData);
-                            receivedInitialData = true;
-                        } catch (err) {
-                            console.error('Realtime put parse error:', err);
-                        }
-                    });
-
-                    realtimeEventSource.addEventListener('patch', function(e) {
-                        try {
-                            const parsed = JSON.parse(e.data);
-                            applyRealtimeEvent('patch', parsed.path, parsed.data);
-                            refreshUIFromLocalData(false);
-                        } catch (err) {
-                            console.error('Realtime patch parse error:', err);
-                        }
-                    });
-
-                    realtimeEventSource.onerror = function(err) {
-                        console.error('Firebase realtime stream error:', err);
-                        if (!receivedInitialData) {
-                            handleError({ message: 'রিয়েল-টাইম সংযোগ স্থাপন করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।' });
-                        }
-                    };
+                    const response = await fetch(firebaseUrl(''));
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    const data = await response.json();
+                    firebaseDataMap = data || {};
+                    refreshUIFromLocalData(!hasLoadedOnce);
+                    hasLoadedOnce = true;
                 } catch (err) {
-                    handleError(err);
+                    console.error('ডেটা ফেচ করতে সমস্যা হয়েছে:', err);
+                    if (!hasLoadedOnce) {
+                        handleError({ message: 'ডেটা লোড করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।' });
+                    }
+                    // পরবর্তী চক্রে আবার চেষ্টা হবে, ততক্ষণ বিদ্যমান ডেটা দেখানো থাকবে
+                } finally {
+                    isFetching = false;
                 }
             }
+
+            function startAutoRefresh() {
+                if (pollTimer) clearInterval(pollTimer);
+                pollTimer = setInterval(fetchDataOnce, POLL_INTERVAL_MS);
+            }
+
+            // ট্যাব ব্যাকগ্রাউন্ডে গেলে পোলিং বন্ধ, সামনে ফিরলে সাথে সাথে রিফ্রেশ করে আবার শুরু (রিসোর্স সাশ্রয়ের জন্য)
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    if (pollTimer) {
+                        clearInterval(pollTimer);
+                        pollTimer = null;
+                    }
+                } else {
+                    fetchDataOnce();
+                    startAutoRefresh();
+                }
+            });
 
             async function handleDropdownChange(event) {
                 const changedSelect = event.target;
@@ -1288,6 +1372,10 @@
                         }
                         showStatusMessage('ডেটা সফলভাবে আপডেট করা হয়েছে।', false);
                         originalRowItem.data[originalColIndex] = newValue;
+                        // লোকাল মিরর-ও সিঙ্কে রাখা হচ্ছে যাতে পরবর্তী রিফ্রেশে পুরনো মান দেখা না যায়
+                        if (firebaseDataMap[originalRowIndex]) {
+                            firebaseDataMap[originalRowIndex][fieldName] = newValue;
+                        }
                         originalData.sort(customSort);
                         filterTable();
                     } catch (error) {
@@ -1362,7 +1450,8 @@
             }
 
             window.onload = function() {
-                startRealtimeSync();
+                fetchDataOnce();
+                startAutoRefresh();
 
                 const filterInputs = document.querySelectorAll('.filter-input');
                 filterInputs.forEach(input => {
