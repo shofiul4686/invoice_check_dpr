@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSTITION INVOICE SEARCH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 2000px;
+            width: 100%;
+        }
+
+        /* --- HEADER SECTION STYLES --- */
+        .header-section {
+            display: block; 
+            margin-bottom: 30px; 
+            padding-left: 10px; 
+            padding-right: 10px;
+        }
+        .header-title {
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            align-items: center; 
+            justify-content: center;
+            gap: 15px; 
+            margin-bottom: 20px;
+        }
+        .header-title img {
+            height: 70px; 
+            max-width: 150px;
+            flex-shrink: 0;
+        }
+        .header-title h1 {
+            color: #2c3e50; 
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700; 
+            line-height: 1;
+        }
+        .header-title h5 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+            color: #2c3e50;
+        }
+        .header-title p {
+            color: #2c3e50; 
+            margin: 5px 0 0;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        .header-text-container div {
+            text-align: left;
+        }
+
+        
+        /* --- Upload & Print Section Style --- */
+        .upload-section {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px dashed #3498db;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center;
+            gap: 15px;
+        }
+        .upload-section input[type="file"] {
+            border: 1px solid #bdc3c7;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: white;
+            max-width: 300px; 
+        }
+        .upload-section button {
+            background-color: #2ecc71;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s;
+        }
+        .upload-section button#printButton {
+            background-color: #3498db; 
+        }
+        .upload-section button:hover {
+            background-color: #27ae60;
+        }
+        .upload-section button#printButton:hover {
+            background-color: #2980b9;
+        }
+
+        /* --- Filter Panel Style --- */
+        .filter-toggle-btn {
+            display: none;
+            width: 100%;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            cursor: pointer;
+            min-height: 44px;
+        }
+        .filter-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-item label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        .filter-clear-item {
+            justify-content: flex-end;
+        }
+        #clearFiltersButton {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            min-height: 40px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        #clearFiltersButton:hover {
+            background-color: #c0392b;
+        }
+
+        /* --- Table Styles (No Change) --- */
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 80vh;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto; 
+            min-width: 1500px; 
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #333;
+            white-space: nowrap; 
+        }
+        th:nth-child(1), td:nth-child(1) { 
+            min-width: 60px; 
+            width: 60px; 
+            text-align: center; 
+        } 
+        th:nth-child(4), td:nth-child(4) { 
+            min-width: 150px; 
+            width: 150px;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #3498db;
+        }
+        th {
+            background-color: #3498db;
+            color: #ffffff;
+            font-weight: 700;
+            height: auto;
+            vertical-align: top;
+        }
+        .th-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            height: 100%;
+        }
+        th span.header-text {
+            margin-bottom: 5px;
+            white-space: nowrap;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        tr.highlight-ok {
+            background-color: #e6ffe6; 
+            font-weight: 500;
+        }
+        tr.highlight-ok:hover {
+            background-color: #d9f2d9;
+        }
+        .highlight-invoice-duplicate {
+            background-color: #fffacd; 
+            font-weight: bold;
+        }
+        .loading-message {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .filter-input, .filter-dropdown {
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            color: #333;
+            background-color: #fff;
+            font-size: 0.9rem;
+        }
+        .editable-cell select {
+            background-color: #ecf0f1;
+            cursor: pointer;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+        .tick-mark {
+            font-size: 1.2em;
+            color: green;
+            font-weight: bold;
+        }
+
+        /* --- Print View Specific Styles (Used inside the new tab) --- */
+        .print-view-body {
+            font-family: 'Inter', sans-serif;
+            margin: 10px;
+        }
+        /* প্রিন্ট হেডারের জন্য ডিফল্ট স্টাইল */
+        .print-view-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center; 
+            gap: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .print-view-header > div {
+            text-align: center !important;
+        }
+        .print-view-header img {
+            height: 50px; 
+        }
+        .print-view-header h1 {
+            font-size: 16pt;
+            margin: 0;
+            font-weight: 700;
+        }
+        .print-view-header p {
+            font-size: 10pt;
+            margin: 2px 0 0;
+        }
+        .print-view-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .print-view-table th, .print-view-table td {
+            border: 1px solid #000;
+            /* প্রিন্ট করার সময় কলাম ফিট করার জন্য প্যাডিং এবং ফন্ট সাইজ কমানো হয়েছে */
+            padding: 3px 5px; /* প্যাডিং আরও কমানো হয়েছে */
+            text-align: left;
+            font-size: 7.5pt; /* ফন্ট সাইজ আরও কমানো হয়েছে */
+            white-space: normal;
+        }
+        .print-view-table thead th {
+            background-color: #3498db;
+            color: #ffffff;
+            -webkit-print-color-adjust: exact; 
+            color-adjust: exact; 
+        }
+        .print-view-table tr:nth-child(even) {
+            background-color: #f8f8f8;
+            -webkit-print-color-adjust: exact; 
+            color-adjust: exact; 
+        }
+        .print-view-table tr.highlight-ok {
+            background-color: #e6ffe6 !important; 
+            -webkit-print-color-adjust: exact; 
+            color-adjust: exact; 
+        }
+        .print-view-table .highlight-invoice-duplicate {
+            background-color: #fffacd !important; 
+            font-weight: bold;
+            -webkit-print-color-adjust: exact; 
+            color-adjust: exact; 
+        }
+        .print-view-table .tick-mark {
+            font-size: 1.1em;
+            color: green;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+        }
+
+        @media print {
+            /* ⭐ গুরুত্বপূর্ণ: টেবিল হেডার রিপিট করার জন্য স্ট্যান্ডার্ড CSS */
+            .print-view-table thead {
+                display: table-header-group; 
+                position: sticky;
+                top: 0;
+            }
+            
+            @page {
+                size: A4 landscape; 
+                /* ⭐ পরিবর্তন ১: মার্জিন বাড়ানো হলো (উপরে ও নিচে) */
+                margin: 15mm; 
+            }
+            
+            /* হেডার সেকশনটি শুধুমাত্র প্রথম পেজেই থাকবে, দ্বিতীয় পেজ থেকে শুধু টেবিলের কলামের নাম রিপিট হবে */
+            .print-header-container {
+                page-break-after: avoid; 
+                /* ⭐ পরিবর্তন ২: হেডারের নিচে মার্জিন বাড়ানো হলো */
+                margin-bottom: 20px; 
+            }
+            
+            .table-and-header-wrapper tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+        }
+        
+        /* --- Responsive Styles (Mobile-friendly card view) --- */
+        @media screen and (max-width: 768px) {
+            body { padding: 8px; }
+            .container { padding: 12px; border-radius: 10px; box-shadow: none; }
+            .header-section {
+                flex-direction: column; 
+                align-items: center;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .header-title {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .header-title img { 
+                height: 55px; 
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+            .header-title h1 { font-size: 18px; }
+            .header-title p { font-size: 12px; }
+            .header-title h1, .header-title p {
+                text-align: center;
+            }
+            .upload-section { 
+                justify-content: center;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .upload-section input[type="file"] {
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                min-height: 44px;
+            }
+            .upload-section button {
+                width: 100%;
+                min-height: 44px;
+                font-size: 0.95rem;
+            }
+
+            /* ফিল্টার প্যানেল ডিফল্টে লুকানো, বাটনে ট্যাপ করলে দেখাবে */
+            .filter-toggle-btn { display: block; }
+            .filter-panel {
+                display: none;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 12px;
+            }
+            .filter-panel.open { display: grid; }
+            .filter-input, .filter-dropdown {
+                min-height: 42px;
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+            .filter-clear-item { grid-column: 1 / -1; }
+
+            /* --- টেবিলকে কার্ড ভিউতে রূপান্তর --- */
+            .table-wrapper {
+                max-height: none;
+                overflow: visible;
+                box-shadow: none;
+                margin-top: 10px;
+            }
+            table { min-width: 0; width: 100%; }
+            thead { display: none; }
+            tbody, tr, td { display: block; width: 100%; }
+            tr {
+                margin-bottom: 14px;
+                border: 1px solid #e0e0e0;
+                border-radius: 10px;
+                padding: 10px 14px;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+                background-color: #ffffff !important;
+            }
+            tr.highlight-ok { background-color: #e6ffe6 !important; }
+            tr:hover { background-color: inherit; }
+            td {
+                border: none;
+                border-bottom: 1px solid #f0f0f0;
+                padding: 9px 0;
+                white-space: normal;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                font-size: 0.88rem;
+                min-width: 0 !important;
+                width: 100% !important;
+                text-align: right;
+            }
+            td:last-child { border-bottom: none; }
+            td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: #2c3e50;
+                flex-shrink: 0;
+                text-align: left;
+            }
+            td.highlight-invoice-duplicate {
+                background-color: #fffacd !important;
+                border-radius: 6px;
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+            .editable-cell select { min-height: 40px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <div class="header-title">
+                <img src="https://ibnsinasylhet.reviewyoursite.co.uk/wp-content/uploads/2020/06/logo.png" alt="IBN SINA Logo" style="height: 70px;">
+                <div>
+                    <br><br>
+                    <h1>The IBN SINA Pharmaceutical Industry PLC</h1>
+                    <p>DINAJPUR DEPOT</p>
+                    <p>RECEVED INVOICE CHECK</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="statusMessage" class="mt-4 p-3 rounded-lg text-center font-semibold transition-all duration-300" style="display:none;"></div>
+
+        <div class="upload-section">
+            <input type="file" id="csvFile" accept=".csv" />
+            <button onclick="handleFileUpload()" id="uploadButton">CSV আপলোড করুন</button>
+            <button onclick="printTable()" id="printButton">প্রিন্ট ডেটা</button> 
+        </div>
+
+        <button type="button" id="filterToggleButton" class="filter-toggle-btn" onclick="toggleFilterPanel()">
+            <span id="filterToggleIcon">▼</span> ফিল্টার দেখান/লুকান
+        </button>
+
+        <div class="filter-panel" id="filterPanel">
+            <div class="filter-item">
+                <label>DA ID/Name</label>
+                <input type="text" class="filter-input" placeholder="Filter DA ID/Name" data-column="0" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>Invoice No</label>
+                <input type="text" class="filter-input" placeholder="Filter Invoice No" data-column="7" inputmode="numeric" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>STATUS</label>
+                <select class="filter-dropdown" id="statusFilter" data-column="10">
+                    <option value="">All Status</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>Client ID/Name</label>
+                <input type="text" class="filter-input" placeholder="Filter Client ID/Name" data-column="2" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>Date</label>
+                <input type="text" class="filter-input" placeholder="Filter Date" data-column="4" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>Category Name</label>
+                <select class="filter-dropdown" id="categoryFilter" data-column="5">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>Total Amount</label>
+                <input type="text" class="filter-input" placeholder="Filter Amount" data-column="8" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>Total OS</label>
+                <input type="text" class="filter-input" placeholder="Filter OS" data-column="9" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>Allocation ID</label>
+                <input type="text" class="filter-input" placeholder="Filter Allocation ID" data-column="6" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>Rep ID/Name</label>
+                <input type="text" class="filter-input" placeholder="Filter Rep ID/Name" data-column="1" onclick="this.select()">
+            </div>
+            <div class="filter-item">
+                <label>Payment Mode</label>
+                <input type="text" class="filter-input" placeholder="Filter Payment Mode" data-column="3" onclick="this.select()">
+            </div>
+            <div class="filter-item filter-clear-item">
+                <button type="button" id="clearFiltersButton" onclick="clearAllFilters()">ফিল্টার মুছুন</button>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading-message">ডেটা লোড হচ্ছে...</div>
+        <div class="table-wrapper">
+            <table id="invoiceDataTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th><span class="header-text">Serial No</span></th>
+                        <th><span class="header-text">DA ID/Name</span></th>
+                        <th><span class="header-text">Invoice No</span></th>
+                        <th><span class="header-text">STATUS</span></th>
+                        <th><span class="header-text">Client ID/Name</span></th>
+                        <th><span class="header-text">Date</span></th>
+                        <th><span class="header-text">Category Name</span></th>
+                        <th><span class="header-text">Total Amount</span></th>
+                        <th><span class="header-text">Total OS</span></th>
+                        <th><span class="header-text">Allocation ID</span></th>
+                        <th><span class="header-text">Rep ID/Name</span></th>
+                        <th><span class="header-text">Payment Mode</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <script>
+            let originalData = [];
+            const statusEditableOptions = ['OK', ''];
+
+            // --- FIREBASE REALTIME DATABASE কনফিগারেশন ---
+            const FIREBASE_BASE_URL = 'https://invoice-check-dpr-default-rtdb.asia-southeast1.firebasedatabase.app';
+            // ডেটা রুট পাথেই সেভ হবে (আলাদা কোনো সাব-নোড ছাড়া)
+            function firebaseUrl(path) {
+                return `${FIREBASE_BASE_URL}/${path}.json`;
+            }
+            // প্রতিটি row array-index (0-10) এর সাথে Firebase-এ ব্যবহৃত ফিল্ড নামের ম্যাপিং
+            const columnFields = ['daId', 'repId', 'clientId', 'paymentMode', 'date', 'category', 'allocationId', 'invoiceNo', 'totalAmount', 'totalOS', 'status'];
+
+            function rowObjectToArray(obj) {
+                obj = obj || {};
+                return columnFields.map(f => (obj[f] !== undefined && obj[f] !== null) ? obj[f] : '');
+            }
+
+            function arrayToRowObject(arr) {
+                const obj = {};
+                columnFields.forEach((f, i) => { obj[f] = arr[i] !== undefined ? arr[i] : ''; });
+                return obj;
+            }
+
+            function generateLocalKey() {
+                return Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            // Firebase key-তে ব্যবহার করা যায় না এমন ক্যারেক্টার ('.', '#', '$', '[', ']', '/') সরিয়ে দেয়
+            function sanitizeFirebaseKeySegment(str) {
+                return String(str || '').trim().replace(/[.#$\[\]\/]/g, '-');
+            }
+
+            // key ফরম্যাট: "Invoice No_Client ID/Name" — একই Invoice No + একই Client হলে ওভাররাইট হবে
+            function generateRowKey(rowArr) {
+                const invoiceNo = sanitizeFirebaseKeySegment(rowArr[7]);   // কলাম index 7 = Invoice No
+                const clientIdName = sanitizeFirebaseKeySegment(rowArr[2]); // কলাম index 2 = Client ID/Name
+                if (invoiceNo && clientIdName) {
+                    return `${invoiceNo}_${clientIdName}`;
+                }
+                // Invoice No বা Client ID/Name খালি থাকলে র‍্যান্ডম key ব্যবহার হবে, যাতে ডেটা হারিয়ে না যায়
+                return generateLocalKey();
+            }
+            // মোবাইল কার্ড-ভিউতে প্রতিটি সেলের উপরে লেবেল দেখানোর জন্য
+            const headerLabelsMap = {
+                0: 'DA ID/Name', 1: 'Rep ID/Name', 2: 'Client ID/Name', 3: 'Payment Mode',
+                4: 'Date', 5: 'Category Name', 6: 'Allocation ID', 7: 'Invoice No',
+                8: 'Total Amount', 9: 'Total OS', 10: 'STATUS'
+            };
+            // --- কলাম ম্যাপিং (ডেটা অ্যারে ইন্ডেক্স অনুযায়ী) ---
+            const printColumnsMap = {
+                'Serial No': 'SERIAL', // বিশেষ কলাম
+                'DA ID/Name': 0, 
+                'Invoice No': 7,
+                'STATUS': 10,
+                'Client ID/Name': 2,
+                'Date': 4,
+                'Total OS': 9,
+            };
+            // ---------------------------------------------------
+
+
+            // --- CSV Upload Functions (Firebase Realtime Database) ---
+            function parseCSVLine(line) {
+                const result = [];
+                let cur = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+                        else { inQuotes = !inQuotes; }
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(cur); cur = '';
+                    } else {
+                        cur += char;
+                    }
+                }
+                result.push(cur);
+                return result.map(v => v.trim());
+            }
+
+            function parseCSV(csvContent) {
+                const lines = csvContent.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
+                if (lines.length === 0) return [];
+                // প্রথম লাইনটি হেডার ধরে বাদ দেওয়া হচ্ছে
+                const dataLines = lines.slice(1);
+                return dataLines.map(line => parseCSVLine(line));
+            }
+
+            async function addRowsToFirebase(rows) {
+                const updates = {};
+                rows.forEach(rowArr => {
+                    const key = generateRowKey(rowArr);
+                    updates[key] = arrayToRowObject(rowArr);
+                });
+                const response = await fetch(firebaseUrl(''), {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+                if (!response.ok) {
+                    throw new Error('Firebase write failed: HTTP ' + response.status);
+                }
+                return Object.keys(updates).length;
+            }
+
+            function handleFileUpload() {
+                const fileInput = document.getElementById('csvFile');
+                const file = fileInput.files[0];
+                const uploadButton = document.getElementById('uploadButton');
+                
+                if (!file) {
+                    showStatusMessage('একটি CSV ফাইল নির্বাচন করুন।', true);
+                    return;
+                }
+                
+                uploadButton.disabled = true;
+                uploadButton.textContent = 'আপলোড হচ্ছে...';
+                showStatusMessage('CSV ফাইলটি আপলোড এবং প্রসেস করা হচ্ছে...', false);
+
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const csvContent = e.target.result;
+                    try {
+                        const rows = parseCSV(csvContent);
+                        if (rows.length === 0) {
+                            showStatusMessage('CSV ফাইলে কোনো বৈধ ডেটা পাওয়া যায়নি।', true);
+                            return;
+                        }
+                        const rowsAdded = await addRowsToFirebase(rows);
+                        showStatusMessage(`ডেটা সফলভাবে যোগ করা হয়েছে। মোট ${rowsAdded} টি নতুন সারি যুক্ত হয়েছে। (রিয়েল-টাইমে টেবিলে দেখা যাবে)`, false);
+                        // রিয়েল-টাইম স্ট্রিম স্বয়ংক্রিয়ভাবে নতুন সারিগুলো টেবিলে দেখাবে, তাই আলাদাভাবে re-fetch করার দরকার নেই
+                    } catch (error) {
+                        showStatusMessage(`CSV ডেটা যোগ করতে সমস্যা হয়েছে: ${error.message}`, true);
+                    } finally {
+                        uploadButton.disabled = false;
+                        uploadButton.textContent = 'CSV আপলোড করুন';
+                        fileInput.value = '';
+                    }
+                };
+                reader.onerror = function() {
+                    uploadButton.disabled = false;
+                    uploadButton.textContent = 'CSV আপলোড করুন';
+                    showStatusMessage('ফাইল পড়তে সমস্যা হয়েছে।', true);
+                };
+                reader.readAsText(file);
+            }
+            // --- End CSV Upload Functions ---
+
+            function showStatusMessage(message, isError = false) {
+                const statusDiv = document.getElementById('statusMessage');
+                statusDiv.textContent = message;
+                statusDiv.style.display = 'block';
+                statusDiv.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+                if (isError) {
+                    statusDiv.classList.add('bg-red-100', 'text-red-800');
+                } else {
+                    statusDiv.classList.add('bg-green-100', 'text-green-800');
+                }
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 4000);
+            }
+
+            function parseDateString(dateValue) {
+                if (typeof dateValue !== 'string' || !dateValue) {
+                    return null;
+                }
+                const dateStr = dateValue.trim().toUpperCase();
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0], 10);
+                    const monthMap = {
+                        'JAN': 0, 'FEB': 1, 'MAR': 2, 'APR': 3, 'MAY': 4, 'JUN': 5,
+                        'JUL': 6, 'AUG': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DEC': 11
+                    };
+                    const month = monthMap[parts[1]];
+                    let year = parseInt(parts[2], 10);
+
+                    if (month !== undefined && !isNaN(day) && !isNaN(year)) {
+                        if (year < 100) {
+                            year += (year > 50) ? 1900 : 2000;
+                        }
+                        const date = new Date(year, month, day);
+                        
+                        if (date.getDate() === day && date.getMonth() === month && date.getFullYear() === year) {
+                            return date;
+                        }
+                    }
+                }
+                return null;
+            }
+
+            function customSort(a, b) {
+                const rowA = a.data;
+                const rowB = b.data;
+                const statusA = String(rowA[10] || '').trim().toLowerCase();
+                const statusB = String(rowB[10] || '').trim().toLowerCase();
+                const isA_OK = statusA === 'ok';
+                const isB_OK = statusB === 'ok';
+                if (isA_OK && !isB_OK) { return 1; }
+                if (!isA_OK && isB_OK) { return -1; }
+                const dateA = parseDateString(rowA[4]); 
+                const dateB = parseDateString(rowB[4]);
+                if (dateA && dateB) {
+                    return dateB.getTime() - dateA.getTime();
+                } else if (dateA) {
+                    return -1;
+                } else if (dateB) {
+                    return 1;
+                }
+                return 0;
+            }
+
+            function populateCategoryFilter(dataToFilter) {
+                const categoryFilterSelect = document.getElementById('categoryFilter');
+                if (!categoryFilterSelect.hasAttribute('data-listener-added')) {
+                    categoryFilterSelect.addEventListener('change', filterTable);
+                    categoryFilterSelect.setAttribute('data-listener-added', 'true');
+                }
+                categoryFilterSelect.innerHTML = '<option value="">All Categories</option>'; 
+                const uniqueCategories = new Set();
+                dataToFilter.forEach(item => {
+                    if (item.data[5]) { 
+                        uniqueCategories.add(String(item.data[5]).trim());
+                    }
+                });
+                const sortedCategories = Array.from(uniqueCategories).sort();
+                sortedCategories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categoryFilterSelect.appendChild(option);
+                });
+            }
+
+            function populateStatusFilter() {
+                const statusFilterSelect = document.getElementById('statusFilter');
+                if (!statusFilterSelect.hasAttribute('data-listener-added')) {
+                    statusFilterSelect.addEventListener('change', filterTable);
+                    statusFilterSelect.setAttribute('data-listener-added', 'true');
+                }
+                statusFilterSelect.innerHTML = ''; 
+                const fixedStatusOptions = [
+                    { value: '', text: 'All Status' },
+                    { value: 'OK', text: 'OK' },
+                    { value: 'BLANK_VALUE_FILTER', text: 'Blank (ফাঁকা)' }
+                ];
+                fixedStatusOptions.forEach(optionData => {
+                    const option = document.createElement('option');
+                    option.value = optionData.value;
+                    option.textContent = optionData.text; 
+                    statusFilterSelect.appendChild(option);
+                });
+            }
+            
+            // --- পূর্ববর্তী স্থিতিশীল প্রিন্ট ফাংশন (মার্জিন বৃদ্ধি সহ) ---
+            function printTable() {
+                try {
+                    const table = document.getElementById('invoiceDataTable');
+                    const tbody = table.getElementsByTagName('tbody')[0];
+
+                    if (tbody.rows.length === 0 || table.style.display === 'none') {
+                        showStatusMessage('প্রিন্ট করার জন্য কোনো ডেটা নেই বা টেবিলটি লোড হয়নি।', true);
+                        return;
+                    }
+                    
+                    const currentDataRows = Array.from(tbody.rows);
+                    
+                    // 1. হেডার সেকশনের HTML তৈরি (এটি শুধুমাত্র একবার প্রিন্ট উইন্ডোর শুরুতে যোগ করা হবে)
+                    const headerTitleDiv = document.querySelector('.header-title');
+                    
+                    const logoHtml = headerTitleDiv.querySelector('img').outerHTML.replace('style="height: 70px;"', 'style="height: 50px; max-width: 150px; flex-shrink: 0;"');
+                    
+                    const textContainerDiv = headerTitleDiv.querySelector('div');
+                    const headerElements = textContainerDiv.querySelectorAll('h1, p');
+                    const h1Text = headerElements[0] ? headerElements[0].textContent : '';
+                    const pText1 = headerElements[1] ? headerElements[1].textContent : '';
+                    const pText2 = headerElements[2] ? headerElements[2].textContent : '';
+
+                    const repeatableHeaderContent = `
+                        <div class="print-header-container" style="width: 100%; text-align: center;">
+                            <div style="display: flex; align-items: flex-start; justify-content: center; gap: 15px; margin: 0 auto; padding-bottom: 10px; border-bottom: 2px solid #ccc; width: fit-content; max-width: 90%;">
+                                ${logoHtml}
+                                <div style="text-align: center; color: #2c3e50; padding-top: 5px;">
+                                    <h1 style="margin: 0; font-size: 16pt; font-weight: 700; line-height: 1;">${h1Text}</h1>
+                                    <p style="margin: 2px 0 0; font-size: 10pt; line-height: 1.2;">${pText1}</p>
+                                    <p style="margin: 2px 0 0; font-size: 10pt; line-height: 1.2;">${pText2}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    
+                    // 2. কন্টেন্ট ফ্রেম তৈরি
+                    let htmlContent = '<!DOCTYPE html><html><head><title>Print Preview</title>';
+                    
+                    // স্টাইলগুলি ইনলাইনভাবে যোগ করা যাতে প্রিন্টে ঠিকমতো আসে
+                    htmlContent += `
+                        <style>
+                            @page { 
+                                size: A4 landscape; 
+                                /* গ্লোবাল প্রিন্ট মার্জিন বাড়ানো হয়েছে */
+                                margin: 15mm; 
+                            }
+                            body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+                            .print-view-body { margin: 10px; }
+                            .print-view-table { 
+                                width: 100%; 
+                                border-collapse: collapse; 
+                                margin-top: 5px; 
+                                table-layout: fixed; 
+                            }
+                            .print-header-container {
+                                page-break-after: avoid; 
+                                /* হেডারের নিচে মার্জিন বাড়ানো হয়েছে */
+                                margin-bottom: 20px; 
+                            }
+                            .print-view-table th, .print-view-table td {
+                                border: 1px solid #000;
+                                padding: 3px 5px; 
+                                text-align: left;
+                                font-size: 7.5pt; 
+                                word-wrap: break-word; 
+                                overflow: hidden;
+                                height: auto;
+                            }
+                            .print-view-table th:nth-child(1), .print-view-table td:nth-child(1) { width: 5%; text-align: center; } 
+                            .print-view-table th:nth-child(2), .print-view-table td:nth-child(2) { width: 20%; } 
+                            .print-view-table th:nth-child(3), .print-view-table td:nth-child(3) { width: 15%; } 
+                            .print-view-table th:nth-child(4), .print-view-table td:nth-child(4) { width: 10%; text-align: center; } 
+                            .print-view-table th:nth-child(5), .print-view-table td:nth-child(5) { width: 25%; } 
+                            .print-view-table th:nth-child(6), .print-view-table td:nth-child(6) { width: 10%; } 
+                            .print-view-table th:nth-child(7), .print-view-table td:nth-child(7) { width: 15%; } 
+
+                            .print-view-table thead th {
+                                background-color: #3498db !important;
+                                color: #ffffff !important;
+                                -webkit-print-color-adjust: exact; 
+                                color-adjust: exact; 
+                            }
+                            .print-view-table tr:nth-child(even) {
+                                background-color: #f8f8f8 !important;
+                                -webkit-print-color-adjust: exact; 
+                                color-adjust: exact; 
+                            }
+                            
+                            /* এটি নিশ্চিত করে যে কলামের হেডার প্রতিটি পেজে রিপিট হবে */
+                            .print-view-table thead {
+                                display: table-header-group; 
+                                -webkit-print-color-adjust: exact;
+                                color-adjust: exact;
+                            }
+                            .print-view-table tr {
+                                page-break-inside: avoid;
+                                page-break-after: auto;
+                            }
+                        </style>
+                    `;
+                    htmlContent += '</head><body class="print-view-body">';
+
+                    // 3. টেবিল হেডার (thead) এর HTML তৈরি
+                    let tableHeaderHtml = '<thead><tr>';
+                    const printColumnsKeys = Object.keys(printColumnsMap);
+                    printColumnsKeys.forEach(headerText => {
+                        tableHeaderHtml += `<th>${headerText}</th>`;
+                    });
+                    tableHeaderHtml += '</tr></thead>';
+
+                    // 4. ডেটা সারি তৈরি
+                    
+                    const invoiceCounts = new Map(); 
+                    originalData.forEach(item => {
+                        const invoiceNo = String(item.data[7] || '').trim(); 
+                        if (invoiceNo) { 
+                            invoiceCounts.set(invoiceNo, (invoiceCounts.get(invoiceNo) || 0) + 1);
+                        }
+                    });
+                    const duplicateInvoices = new Set();
+                    invoiceCounts.forEach((count, invoiceNo) => {
+                        if (count > 1) {
+                            duplicateInvoices.add(invoiceNo);
+                        }
+                    });
+
+                    let tableBodyHtml = '<tbody>';
+                    currentDataRows.forEach((row, rowIndex) => {
+                        let rowClass = row.classList.contains('highlight-ok') ? ' highlight-ok' : '';
+                        let isDuplicate = row.cells[2].classList.contains('highlight-invoice-duplicate'); 
+                        
+                        tableBodyHtml += `<tr class="${rowClass}">`;
+
+                        let serialNo = rowIndex + 1;
+                        
+                        printColumnsKeys.forEach(key => {
+                            tableBodyHtml += '<td>';
+                            
+                            if (key === 'Serial No') {
+                                tableBodyHtml += serialNo;
+                                tableBodyHtml += '</td>';
+                                return;
+                            }
+
+                            const originalColIndex = printColumnsMap[key]; 
+                            let originalRowIndex = null;
+                            const selectElement = row.cells[3].querySelector('select');
+
+                            if (selectElement) {
+                                originalRowIndex = selectElement.dataset.originalRowIndex; // firebase key (string)
+                            } 
+
+                            if (selectElement) {
+                                if (key === 'STATUS') {
+                                    const statusValue = selectElement.value.trim().toLowerCase();
+                                    tableBodyHtml += statusValue === 'ok' ? '<span class="tick-mark">✓</span>' : selectElement.value;
+                                } else {
+                                    const originalRowItem = originalData.find(item => item.originalIndex === originalRowIndex);
+                                    if (originalRowItem) {
+                                        let cellContent = String(originalRowItem.data[originalColIndex] || '');
+                                        if (key === 'Invoice No' && duplicateInvoices.has(cellContent.trim())) {
+                                            const highlightStyle = 'background-color: #fffacd !important; font-weight: bold;';
+                                            tableBodyHtml += `<span style="${highlightStyle}">${cellContent}</span>`;
+                                        } else {
+                                            tableBodyHtml += cellContent;
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Non-editable cells
+                                let originalDisplayIndex = -1;
+                                if (key === 'DA ID/Name') originalDisplayIndex = 1;
+                                else if (key === 'Invoice No') originalDisplayIndex = 2;
+                                else if (key === 'STATUS') originalDisplayIndex = 3;
+                                else if (key === 'Client ID/Name') originalDisplayIndex = 4;
+                                else if (key === 'Date') originalDisplayIndex = 5;
+                                else if (key === 'Total OS') originalDisplayIndex = 8; 
+
+                                if (originalDisplayIndex !== -1) {
+                                    const originalCell = row.cells[originalDisplayIndex];
+                                    if (key === 'STATUS') {
+                                        let cellContent = originalCell.textContent.trim();
+                                        tableBodyHtml += cellContent === '✓' ? '<span class="tick-mark">✓</span>' : cellContent;
+                                    } else {
+                                        let cellContent = originalCell.textContent;
+                                        if (key === 'Invoice No' && isDuplicate) {
+                                            const highlightStyle = 'background-color: #fffacd !important; font-weight: bold;';
+                                            tableBodyHtml += `<span style="${highlightStyle}">${cellContent}</span>`;
+                                        } else {
+                                            tableBodyHtml += cellContent;
+                                        }
+                                    }
+                                }
+                            }
+
+                            tableBodyHtml += '</td>';
+                        });
+                        tableBodyHtml += '</tr>';
+                    });
+                    tableBodyHtml += '</tbody>';
+
+                    // 5. পুরো কন্টেন্ট একসাথে করা
+                    htmlContent += repeatableHeaderContent; // টেবিলের উপরে একবার হেডার
+                    htmlContent += '<div class="table-and-header-wrapper">'; 
+                    htmlContent += '<table class="print-view-table">';
+                    htmlContent += tableHeaderHtml; // কলামের নামগুলো
+                    htmlContent += tableBodyHtml;
+                    htmlContent += '</table>';
+                    htmlContent += '</div>';
+
+                    htmlContent += '</body></html>';
+
+                    // নতুন ট্যাব/উইন্ডো খোলা
+                    const printWindow = window.open('', '_blank');
+                    
+                    if (!printWindow || printWindow.closed || typeof printWindow.closed === 'undefined') {
+                        showStatusMessage('প্রিন্ট প্রিভিউ খুলতে সমস্যা হচ্ছে। অনুগ্রহ করে আপনার ব্রাউজারের **পপ-আপ ব্লকার (Pop-up Blocker)** বন্ধ করুন এবং আবার চেষ্টা করুন।', true);
+                        return;
+                    }
+
+                    printWindow.document.write(htmlContent);
+                    printWindow.document.close(); 
+                    
+                    // প্রিন্ট ডায়ালগ খোলা
+                    printWindow.print();
+                    
+                    setTimeout(function() {
+                        printWindow.close();
+                    }, 100); 
+                } catch (error) {
+                    showStatusMessage(`প্রিন্ট ফাংশনে ত্রুটি: ${error.message}. অনুগ্রহ করে Console চেক করুন।`, true);
+                    console.error("Print Error:", error);
+                }
+            }
+            // --- End Reverted Print Function ---
+
+            function renderTableBody(dataToRender) {
+                const tableBody = document.getElementById('invoiceDataTable').getElementsByTagName('tbody')[0];
+                const loadingMessage = document.getElementById('loading');
+                const dataTable = document.getElementById('invoiceDataTable');
+                tableBody.innerHTML = '';
+
+                if (!dataToRender || dataToRender.length === 0) {
+                    const row = tableBody.insertRow();
+                    const cell = row.insertCell();
+                    cell.colSpan = 12;
+                    cell.textContent = 'কোনো ডেটা পাওয়া যায়নি।';
+                    cell.style.textAlign = 'center';
+                    loadingMessage.style.display = 'none';
+                    dataTable.style.display = 'table';
+                    return;
+                }
+
+                const invoiceCounts = new Map();
+                dataToRender.forEach(item => {
+                    const invoiceNo = String(item.data[7] || '').trim(); 
+                    if (invoiceNo) { 
+                        invoiceCounts.set(invoiceNo, (invoiceCounts.get(invoiceNo) || 0) + 1);
+                    }
+                });
+                const duplicateInvoices = new Set();
+                invoiceCounts.forEach((count, invoiceNo) => {
+                    if (count > 1) {
+                        duplicateInvoices.add(invoiceNo);
+                    }
+                });
+
+                dataToRender.forEach((item, sortedIndex) => { 
+                    const rowData = item.data;
+                    const originalRowIndex = item.originalIndex; 
+                    const row = tableBody.insertRow();
+                    const serialNoCell = row.insertCell();
+                    serialNoCell.textContent = sortedIndex + 1;
+                    serialNoCell.setAttribute('data-label', 'Serial No');
+
+                    const statusValue = String(rowData[10] || '').trim().toLowerCase();
+                    if (statusValue === 'ok') {
+                        row.classList.add('highlight-ok');
+                    }
+                    
+                    const displayOrder = [0, 7, 10, 2, 4, 5, 8, 9, 6, 1, 3]; 
+
+                    displayOrder.forEach(originalColIndex => {
+                        const rawCellData = rowData[originalColIndex];
+                        const cellData = rawCellData !== undefined && rawCellData !== null ? String(rawCellData) : '';
+                        const cell = row.insertCell();
+                        cell.setAttribute('data-label', headerLabelsMap[originalColIndex] || '');
+                        
+                        if (originalColIndex === 7 && duplicateInvoices.has(cellData.trim())) {
+                            cell.classList.add('highlight-invoice-duplicate');
+                        }
+
+                        if (originalColIndex === 10) { 
+                            const trimmedLowercasedCellData = cellData.trim().toLowerCase();
+
+                            if (trimmedLowercasedCellData === 'ok') {
+                                cell.innerHTML = '<span class="tick-mark">✓</span>';
+                                cell.classList.add('status-ok-cell');
+                                cell.title = 'পরিবর্তন করতে ডাবল-ক্লিক করুন';
+                                cell.addEventListener('dblclick', function() {
+                                    alert('STATUS এডিট মোড চালু হয়েছে। নতুন স্ট্যাটাস নির্বাচন করুন।');
+                                    cell.innerHTML = '';
+                                    cell.classList.remove('status-ok-cell');
+                                    cell.classList.add('editable-cell');
+                                    cell.appendChild(buildStatusSelect(cellData, originalRowIndex, originalColIndex));
+                                });
+                            }
+                            else {
+                                cell.classList.add('editable-cell');
+                                cell.appendChild(buildStatusSelect(cellData, originalRowIndex, originalColIndex));
+                            }
+                        }
+                        else {
+                            cell.textContent = cellData;
+                        }
+                    });
+                });
+                loadingMessage.style.display = 'none';
+                dataTable.style.display = 'table';
+            }
+
+            // --- রিয়েল-টাইম সিঙ্ক (Firebase REST API স্ট্রিমিং, Server-Sent Events) ---
+            let firebaseDataMap = {}; // Firebase key -> row object, লোকাল মিরর
+            let realtimeEventSource = null;
+
+            function rebuildOriginalDataFromMap() {
+                const items = Object.keys(firebaseDataMap).map(key => ({
+                    originalIndex: key,
+                    data: rowObjectToArray(firebaseDataMap[key])
+                }));
+                originalData = items;
+                originalData.sort(customSort);
+            }
+
+            // Firebase থেকে আসা 'put' (সম্পূর্ণ প্রতিস্থাপন) বা 'patch' (আংশিক আপডেট) ইভেন্ট লোকাল মিররে প্রয়োগ করে
+            function applyRealtimeEvent(eventType, pathStr, data) {
+                if (pathStr === '/') {
+                    if (eventType === 'put') {
+                        firebaseDataMap = data || {};
+                    } else if (data) {
+                        Object.keys(data).forEach(key => {
+                            if (data[key] === null) {
+                                delete firebaseDataMap[key];
+                            } else {
+                                firebaseDataMap[key] = { ...(firebaseDataMap[key] || {}), ...data[key] };
+                            }
+                        });
+                    }
+                } else {
+                    const key = pathStr.replace(/^\//, '').split('/')[0];
+                    if (eventType === 'put') {
+                        if (data === null) {
+                            delete firebaseDataMap[key];
+                        } else {
+                            firebaseDataMap[key] = data;
+                        }
+                    } else if (data) {
+                        firebaseDataMap[key] = { ...(firebaseDataMap[key] || {}), ...data };
+                    }
+                }
+            }
+
+            function refreshUIFromLocalData(isInitialLoad) {
+                rebuildOriginalDataFromMap();
+                if (isInitialLoad) {
+                    populateCategoryFilter(originalData);
+                    populateStatusFilter();
+                    renderTableBody(originalData);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('invoiceDataTable').style.display = 'table';
+                } else {
+                    const categorySelect = document.getElementById('categoryFilter');
+                    const currentCategoryValue = categorySelect ? categorySelect.value : '';
+                    populateCategoryFilter(originalData);
+                    if (categorySelect) categorySelect.value = currentCategoryValue;
+                    filterTable();
+                }
+            }
+
+            function startRealtimeSync() {
+                let receivedInitialData = false;
+                try {
+                    realtimeEventSource = new EventSource(firebaseUrl(''));
+
+                    realtimeEventSource.addEventListener('put', function(e) {
+                        try {
+                            const parsed = JSON.parse(e.data);
+                            applyRealtimeEvent('put', parsed.path, parsed.data);
+                            refreshUIFromLocalData(!receivedInitialData);
+                            receivedInitialData = true;
+                        } catch (err) {
+                            console.error('Realtime put parse error:', err);
+                        }
+                    });
+
+                    realtimeEventSource.addEventListener('patch', function(e) {
+                        try {
+                            const parsed = JSON.parse(e.data);
+                            applyRealtimeEvent('patch', parsed.path, parsed.data);
+                            refreshUIFromLocalData(false);
+                        } catch (err) {
+                            console.error('Realtime patch parse error:', err);
+                        }
+                    });
+
+                    realtimeEventSource.onerror = function(err) {
+                        console.error('Firebase realtime stream error:', err);
+                        if (!receivedInitialData) {
+                            handleError({ message: 'রিয়েল-টাইম সংযোগ স্থাপন করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।' });
+                        }
+                    };
+                } catch (err) {
+                    handleError(err);
+                }
+            }
+
+            async function handleDropdownChange(event) {
+                const changedSelect = event.target;
+                const originalRowIndex = changedSelect.dataset.originalRowIndex; // firebase key (string)
+                const originalColIndex = parseInt(changedSelect.dataset.originalColIndex);
+                const newValue = changedSelect.value.trim();
+                const originalRowItem = originalData.find(item => item.originalIndex === originalRowIndex);
+                
+                if (!originalRowItem) {
+                    showStatusMessage('ত্রুটি: ডেটা রো খুঁজে পাওয়া যায়নি।', true);
+                    return;
+                }
+                
+                const originalValueInLocalData = originalRowItem.data[originalColIndex];
+                const trimmedLowercasedOriginalValue = String(originalValueInLocalData || '').trim().toLowerCase();
+                const trimmedLowercasedNewValue = newValue.toLowerCase();
+
+                if (trimmedLowercasedOriginalValue !== trimmedLowercasedNewValue) {
+                    changedSelect.disabled = true;
+                    const fieldName = columnFields[originalColIndex];
+
+                    try {
+                        const response = await fetch(firebaseUrl(originalRowIndex), {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ [fieldName]: newValue })
+                        });
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        showStatusMessage('ডেটা সফলভাবে আপডেট করা হয়েছে।', false);
+                        originalRowItem.data[originalColIndex] = newValue;
+                        originalData.sort(customSort);
+                        filterTable();
+                    } catch (error) {
+                        showStatusMessage(`আপডেট করতে সমস্যা হয়েছে: ${error.message}. Console চেক করুন।`, true);
+                        changedSelect.value = originalValueInLocalData;
+                    } finally {
+                        changedSelect.disabled = false;
+                    }
+                }
+            }
+
+            function handleError(error) {
+                const loadingMessage = document.getElementById('loading');
+                loadingMessage.textContent = 'ডেটা লোড করতে সমস্যা হয়েছে: ' + error.message;
+                loadingMessage.style.color = 'red';
+                document.getElementById('invoiceDataTable').style.display = 'none';
+            }
+            
+            function filterTable() {
+                const filters = {};
+                document.querySelectorAll('.filter-input, .filter-dropdown').forEach(element => {
+                    const originalColIndex = element.dataset.column;
+                    let value = element.value.trim();
+                    if (value && value !== 'All Categories' && value !== 'All Status') {
+                        filters[originalColIndex] = value;
+                    }
+                });
+
+                const filteredData = originalData.filter(item => {
+                    const rowData = item.data;
+                    let isMatch = true;
+
+                    for (const colIndex in filters) {
+                        const filterValue = filters[colIndex];
+                        const rawCellValue = rowData[colIndex];
+                        const cellValue = String(rawCellValue || '').trim();
+                        const colIndexInt = parseInt(colIndex);
+
+                        if (filterValue === 'BLANK_VALUE_FILTER') {
+                            if (colIndexInt === 10 && cellValue !== '') {
+                                isMatch = false;
+                                break;
+                            }
+                        } else if (colIndexInt === 10 || colIndexInt === 5) { 
+                            if (cellValue.toLowerCase() !== filterValue.toLowerCase()) {
+                                isMatch = false;
+                                break;
+                            }
+                        } else { 
+                            if (cellValue.toLowerCase().indexOf(filterValue.toLowerCase()) === -1) {
+                                isMatch = false;
+                                break;
+                            }
+                        }
+                    }
+                    return isMatch;
+                });
+                renderTableBody(filteredData);
+            }
+
+            function toggleFilterPanel() {
+                const panel = document.getElementById('filterPanel');
+                const icon = document.getElementById('filterToggleIcon');
+                panel.classList.toggle('open');
+                icon.textContent = panel.classList.contains('open') ? '▲' : '▼';
+            }
+
+            function clearAllFilters() {
+                document.querySelectorAll('.filter-input').forEach(input => { input.value = ''; });
+                document.querySelectorAll('.filter-dropdown').forEach(select => { select.value = ''; });
+                filterTable();
+            }
+
+            window.onload = function() {
+                startRealtimeSync();
+
+                const filterInputs = document.querySelectorAll('.filter-input');
+                filterInputs.forEach(input => {
+                    input.addEventListener('keyup', filterTable);
+                });
+            };
+        </script>
+    </div>
+</body>
+</html>
