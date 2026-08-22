@@ -191,7 +191,7 @@
             width: 60px; 
             text-align: center; 
         } 
-        th:nth-child(4), td:nth-child(4) { 
+        th:nth-child(3), td:nth-child(3) { 
             min-width: 150px; 
             width: 150px;
         }
@@ -268,6 +268,14 @@
             color: green;
             font-weight: bold;
         }
+        .status-display-cell {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .status-display-cell:hover {
+            background-color: #eaf4fc;
+        }
 
         /* --- Print View Specific Styles (Used inside the new tab) --- */
         .print-view-body {
@@ -304,10 +312,10 @@
         }
         .print-view-table th, .print-view-table td {
             border: 1px solid #000;
-            /* প্রিন্ট করার সময় কলাম ফিট করার জন্য প্যাডিং এবং ফন্ট সাইজ কমানো হয়েছে */
-            padding: 3px 5px; /* প্যাডিং আরও কমানো হয়েছে */
+            /* প্রিন্ট করার সময় কলাম ফিট করার জন্য প্যাডিং এবং ফন্ট সাইজ কমানো হয়েছে */
+            padding: 3px 5px; /* প্যাডিং আরও কমানো হয়েছে */
             text-align: left;
-            font-size: 7.5pt; /* ফন্ট সাইজ আরও কমানো হয়েছে */
+            font-size: 7.5pt; /* ফন্ট সাইজ আরও কমানো হয়েছে */
             white-space: normal;
         }
         .print-view-table thead th {
@@ -350,14 +358,14 @@
             
             @page {
                 size: A4 landscape; 
-                /* ⭐ পরিবর্তন ১: মার্জিন বাড়ানো হলো (উপরে ও নিচে) */
+                /* ⭐ পরিবর্তন ১: মার্জিন বাড়ানো হলো (উপরে ও নিচে) */
                 margin: 15mm; 
             }
             
             /* হেডার সেকশনটি শুধুমাত্র প্রথম পেজেই থাকবে, দ্বিতীয় পেজ থেকে শুধু টেবিলের কলামের নাম রিপিট হবে */
             .print-header-container {
                 page-break-after: avoid; 
-                /* ⭐ পরিবর্তন ২: হেডারের নিচে মার্জিন বাড়ানো হলো */
+                /* ⭐ পরিবর্তন ২: হেডারের নিচে মার্জিন বাড়ানো হলো */
                 margin-bottom: 20px; 
             }
             
@@ -394,19 +402,29 @@
             }
             .upload-section { 
                 justify-content: center;
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: nowrap;
                 align-items: stretch;
+                gap: 6px;
             }
             .upload-section input[type="file"] {
-                max-width: 100%;
-                width: 100%;
+                flex: 1 1 0;
+                min-width: 0;
+                max-width: none;
                 box-sizing: border-box;
-                min-height: 44px;
+                min-height: 40px;
+                font-size: 0.7rem;
+                padding: 4px;
             }
             .upload-section button {
-                width: 100%;
-                min-height: 44px;
-                font-size: 0.95rem;
+                flex: 1 1 0;
+                min-width: 0;
+                min-height: 40px;
+                font-size: 0.72rem;
+                padding: 8px 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             /* ফিল্টার প্যানেল ডিফল্টে লুকানো, বাটনে ট্যাপ করলে দেখাবে */
@@ -425,47 +443,19 @@
             }
             .filter-clear-item { grid-column: 1 / -1; }
 
-            /* --- টেবিলকে কার্ড ভিউতে রূপান্তর --- */
+            /* --- মোবাইলে টেবিল ফরম্যাটেই থাকবে, পাশে স্ক্রল করে দেখা যাবে --- */
             .table-wrapper {
-                max-height: none;
-                overflow: visible;
-                box-shadow: none;
-                margin-top: 10px;
+                max-height: 70vh;
+                overflow-x: auto;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 8px;
             }
-            table { min-width: 0; width: 100%; }
-            thead { display: none; }
-            tbody, tr, td { display: block; width: 100%; }
-            tr {
-                margin-bottom: 14px;
-                border: 1px solid #e0e0e0;
-                border-radius: 10px;
-                padding: 10px 14px;
-                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-                background-color: #ffffff !important;
-            }
-            tr.highlight-ok { background-color: #e6ffe6 !important; }
-            tr:hover { background-color: inherit; }
-            td {
-                border: none;
-                border-bottom: 1px solid #f0f0f0;
-                padding: 9px 0;
-                white-space: normal;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 10px;
-                font-size: 0.88rem;
-                min-width: 0 !important;
-                width: 100% !important;
-                text-align: right;
-            }
-            td:last-child { border-bottom: none; }
-            td::before {
-                content: attr(data-label);
-                font-weight: 700;
-                color: #2c3e50;
-                flex-shrink: 0;
-                text-align: left;
+            table { min-width: 900px; width: 100%; }
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+                white-space: nowrap;
             }
             td.highlight-invoice-duplicate {
                 background-color: #fffacd !important;
@@ -473,7 +463,17 @@
                 padding-left: 6px;
                 padding-right: 6px;
             }
-            .editable-cell select { min-height: 40px; }
+            .editable-cell select { min-height: 40px; font-size: 0.8rem; }
+            /* সিরিয়াল নং + DA ID কলাম স্ক্রল করার সময়ও দৃশ্যমান থাকবে */
+            th:nth-child(1), td:nth-child(1) {
+                position: sticky;
+                left: 0;
+                z-index: 2;
+                background-color: #ffffff;
+                box-shadow: 2px 0 3px rgba(0,0,0,0.06);
+            }
+            thead th:nth-child(1) { z-index: 11; background-color: #3498db; }
+            tr.highlight-ok td:nth-child(1) { background-color: #e6ffe6; }
         }
     </style>
 </head>
@@ -563,9 +563,9 @@
                 <thead>
                     <tr>
                         <th><span class="header-text">Serial No</span></th>
-                        <th><span class="header-text">DA ID/Name</span></th>
                         <th><span class="header-text">Invoice No</span></th>
                         <th><span class="header-text">STATUS</span></th>
+                        <th><span class="header-text">DA ID/Name</span></th>
                         <th><span class="header-text">Client ID/Name</span></th>
                         <th><span class="header-text">Date</span></th>
                         <th><span class="header-text">Category Name</span></th>
@@ -633,11 +633,11 @@
             // --- কলাম ম্যাপিং (ডেটা অ্যারে ইন্ডেক্স অনুযায়ী) ---
             const printColumnsMap = {
                 'Serial No': 'SERIAL', // বিশেষ কলাম
-                'Date': 4,
-                'DA ID/Name': 0, 
                 'Invoice No': 7,
                 'STATUS': 10,
+                'DA ID/Name': 0, 
                 'Client ID/Name': 2,
+                'Date': 4,
                 'Total OS': 9,
             };
             // ---------------------------------------------------
@@ -712,9 +712,8 @@
                             return;
                         }
                         const rowsAdded = await addRowsToFirebase(rows);
-                        showStatusMessage(`ডেটা সফলভাবে যোগ করা হয়েছে। মোট ${rowsAdded} টি নতুন সারি যুক্ত হয়েছে।`, false);
-                        // পরবর্তী পোলিং সাইকেলে নতুন সারি স্বয়ংক্রিয়ভাবে দেখা যাবে; দ্রুত দেখতে এখনই একবার রিফ্রেশ করা হচ্ছে
-                        fetchDataOnce();
+                        showStatusMessage(`ডেটা সফলভাবে যোগ করা হয়েছে। মোট ${rowsAdded} টি নতুন সারি যুক্ত হয়েছে। (রিয়েল-টাইমে টেবিলে দেখা যাবে)`, false);
+                        // রিয়েল-টাইম স্ট্রিম স্বয়ংক্রিয়ভাবে নতুন সারিগুলো টেবিলে দেখাবে, তাই আলাদাভাবে re-fetch করার দরকার নেই
                     } catch (error) {
                         showStatusMessage(`CSV ডেটা যোগ করতে সমস্যা হয়েছে: ${error.message}`, true);
                     } finally {
@@ -747,89 +746,33 @@
                 }, 4000);
             }
 
-            const MONTH_NAME_MAP = {
-                'JAN': 0, 'FEB': 1, 'MAR': 2, 'APR': 3, 'MAY': 4, 'JUN': 5,
-                'JUL': 6, 'AUG': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DEC': 11
-            };
-            const MONTH_NAMES_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-
-            // বিভিন্ন সোর্স (CSV, Firebase, ম্যানুয়াল এন্ট্রি) থেকে আসা ভিন্ন ভিন্ন ফরম্যাটের ডেট স্ট্রিং/সংখ্যা পার্স করে
             function parseDateString(dateValue) {
-                if (dateValue === null || dateValue === undefined || dateValue === '') {
+                if (typeof dateValue !== 'string' || !dateValue) {
                     return null;
                 }
-                if (dateValue instanceof Date) {
-                    return isNaN(dateValue.getTime()) ? null : dateValue;
-                }
+                const dateStr = dateValue.trim().toUpperCase();
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0], 10);
+                    const monthMap = {
+                        'JAN': 0, 'FEB': 1, 'MAR': 2, 'APR': 3, 'MAY': 4, 'JUN': 5,
+                        'JUL': 6, 'AUG': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DEC': 11
+                    };
+                    const month = monthMap[parts[1]];
+                    let year = parseInt(parts[2], 10);
 
-                const rawStr = String(dateValue).trim();
-                if (!rawStr) return null;
-
-                // Excel সিরিয়াল ডেট নম্বর (যেমন 45678) — CSV এক্সপোর্টে মাঝে মাঝে দেখা যায়
-                if (/^\d+(\.\d+)?$/.test(rawStr)) {
-                    const serial = parseFloat(rawStr);
-                    if (serial > 20000 && serial < 90000) {
-                        const excelEpoch = Date.UTC(1899, 11, 30);
-                        const d = new Date(excelEpoch + serial * 86400000);
-                        if (!isNaN(d.getTime())) return d;
-                    }
-                }
-
-                const dateStr = rawStr.toUpperCase();
-
-                // DD-MON-YYYY / DD MON YYYY / DD.MON.YYYY (যেমন 01-JAN-24, 1 Jan 2024)
-                let m = dateStr.match(/^(\d{1,2})[\-\/\.\s]+([A-Z]{3,})[\-\/\.\s]+(\d{2,4})$/);
-                if (m) {
-                    const day = parseInt(m[1], 10);
-                    const month = MONTH_NAME_MAP[m[2].substring(0, 3)];
-                    let year = parseInt(m[3], 10);
                     if (month !== undefined && !isNaN(day) && !isNaN(year)) {
-                        if (year < 100) year += (year > 50) ? 1900 : 2000;
-                        const d = new Date(year, month, day);
-                        if (d.getDate() === day && d.getMonth() === month && d.getFullYear() === year) return d;
+                        if (year < 100) {
+                            year += (year > 50) ? 1900 : 2000;
+                        }
+                        const date = new Date(year, month, day);
+                        
+                        if (date.getDate() === day && date.getMonth() === month && date.getFullYear() === year) {
+                            return date;
+                        }
                     }
                 }
-
-                // YYYY-MM-DD / YYYY/MM/DD (ISO স্টাইল, সময় থাকলেও ঠিক আছে)
-                m = dateStr.match(/^(\d{4})[\-\/](\d{1,2})[\-\/](\d{1,2})/);
-                if (m) {
-                    const year = parseInt(m[1], 10);
-                    const month = parseInt(m[2], 10) - 1;
-                    const day = parseInt(m[3], 10);
-                    const d = new Date(year, month, day);
-                    if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) return d;
-                }
-
-                // DD-MM-YYYY / DD/MM/YYYY (সংখ্যায় লেখা তারিখ)
-                m = dateStr.match(/^(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{2,4})$/);
-                if (m) {
-                    let day = parseInt(m[1], 10);
-                    let month = parseInt(m[2], 10) - 1;
-                    let year = parseInt(m[3], 10);
-                    if (year < 100) year += (year > 50) ? 1900 : 2000;
-                    // মাসের ঘরে ১২-এর বেশি সংখ্যা থাকলে (MM-DD-YYYY ফরম্যাট ধরে নিয়ে) দিন/মাস অদল-বদল করে দেখা হয়
-                    if (month > 11 && day <= 12) {
-                        const tmp = day; day = month + 1; month = tmp - 1;
-                    }
-                    const d = new Date(year, month, day);
-                    if (!isNaN(d.getTime()) && d.getMonth() === month && d.getDate() === day) return d;
-                }
-
-                // সবশেষে ব্রাউজারের নেটিভ পার্সার দিয়ে চেষ্টা (যেমন "Jan 1, 2024", পূর্ণ ISO টাইমস্ট্যাম্প ইত্যাদি)
-                const nativeParsed = new Date(rawStr);
-                if (!isNaN(nativeParsed.getTime())) {
-                    return nativeParsed;
-                }
-
                 return null;
-            }
-
-            // পার্স করা Date-কে সবসময় একই, পড়া-সহজ ফরম্যাটে (DD-MON-YYYY) দেখানোর জন্য
-            function formatDateForDisplay(date) {
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = MONTH_NAMES_SHORT[date.getMonth()];
-                const year = date.getFullYear();
-                return `${day}-${month}-${year}`;
             }
 
             function customSort(a, b) {
@@ -902,31 +845,11 @@
                     const tbody = table.getElementsByTagName('tbody')[0];
 
                     if (tbody.rows.length === 0 || table.style.display === 'none') {
-                        showStatusMessage('প্রিন্ট করার জন্য কোনো ডেটা নেই বা টেবিলটি লোড হয়নি।', true);
+                        showStatusMessage('প্রিন্ট করার জন্য কোনো ডেটা নেই বা টেবিলটি লোড হয়নি।', true);
                         return;
                     }
                     
                     const currentDataRows = Array.from(tbody.rows);
-
-                    // প্রিন্টের জন্য: প্রথমে Date অনুযায়ী (পুরনো থেকে নতুন), একই তারিখের মধ্যে DA ID/Name অনুযায়ী (A-Z) সাজানো
-                    // অন-স্ক্রিন টেবিলের অর্ডার অপরিবর্তিত থাকে, শুধু প্রিন্ট প্রিভিউতে এই ক্রম ব্যবহার হয়
-                    const rowsForPrint = currentDataRows.slice().sort((rowA, rowB) => {
-                        const dateTextA = rowA.cells[5] ? rowA.cells[5].textContent.trim() : '';
-                        const dateTextB = rowB.cells[5] ? rowB.cells[5].textContent.trim() : '';
-                        const dateA = parseDateString(dateTextA);
-                        const dateB = parseDateString(dateTextB);
-                        if (dateA && dateB) {
-                            const diff = dateA.getTime() - dateB.getTime();
-                            if (diff !== 0) return diff;
-                        } else if (dateA) {
-                            return -1;
-                        } else if (dateB) {
-                            return 1;
-                        }
-                        const daA = rowA.cells[1] ? rowA.cells[1].textContent.trim().toLowerCase() : '';
-                        const daB = rowB.cells[1] ? rowB.cells[1].textContent.trim().toLowerCase() : '';
-                        return daA.localeCompare(daB);
-                    });
                     
                     // 1. হেডার সেকশনের HTML তৈরি (এটি শুধুমাত্র একবার প্রিন্ট উইন্ডোর শুরুতে যোগ করা হবে)
                     const headerTitleDiv = document.querySelector('.header-title');
@@ -961,7 +884,7 @@
                         <style>
                             @page { 
                                 size: A4 landscape; 
-                                /* গ্লোবাল প্রিন্ট মার্জিন বাড়ানো হয়েছে */
+                                /* গ্লোবাল প্রিন্ট মার্জিন বাড়ানো হয়েছে */
                                 margin: 15mm; 
                             }
                             body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -974,7 +897,7 @@
                             }
                             .print-header-container {
                                 page-break-after: avoid; 
-                                /* হেডারের নিচে মার্জিন বাড়ানো হয়েছে */
+                                /* হেডারের নিচে মার্জিন বাড়ানো হয়েছে */
                                 margin-bottom: 20px; 
                             }
                             .print-view-table th, .print-view-table td {
@@ -987,11 +910,11 @@
                                 height: auto;
                             }
                             .print-view-table th:nth-child(1), .print-view-table td:nth-child(1) { width: 5%; text-align: center; } 
-                            .print-view-table th:nth-child(2), .print-view-table td:nth-child(2) { width: 10%; text-align: center; } 
-                            .print-view-table th:nth-child(3), .print-view-table td:nth-child(3) { width: 20%; } 
-                            .print-view-table th:nth-child(4), .print-view-table td:nth-child(4) { width: 15%; } 
-                            .print-view-table th:nth-child(5), .print-view-table td:nth-child(5) { width: 10%; text-align: center; } 
-                            .print-view-table th:nth-child(6), .print-view-table td:nth-child(6) { width: 25%; } 
+                            .print-view-table th:nth-child(2), .print-view-table td:nth-child(2) { width: 15%; } 
+                            .print-view-table th:nth-child(3), .print-view-table td:nth-child(3) { width: 10%; text-align: center; } 
+                            .print-view-table th:nth-child(4), .print-view-table td:nth-child(4) { width: 20%; } 
+                            .print-view-table th:nth-child(5), .print-view-table td:nth-child(5) { width: 25%; } 
+                            .print-view-table th:nth-child(6), .print-view-table td:nth-child(6) { width: 10%; } 
                             .print-view-table th:nth-child(7), .print-view-table td:nth-child(7) { width: 15%; } 
 
                             .print-view-table thead th {
@@ -1016,55 +939,9 @@
                                 page-break-inside: avoid;
                                 page-break-after: auto;
                             }
-                            .print-toolbar {
-                                position: sticky;
-                                top: 0;
-                                z-index: 100;
-                                display: flex;
-                                justify-content: center;
-                                gap: 10px;
-                                padding: 12px;
-                                background-color: #f0f2f5;
-                                border-bottom: 1px solid #ccc;
-                                margin: -10px -10px 15px -10px;
-                            }
-                            .print-toolbar button {
-                                font-family: 'Inter', sans-serif;
-                                font-weight: 700;
-                                font-size: 10pt;
-                                padding: 8px 20px;
-                                border: none;
-                                border-radius: 6px;
-                                cursor: pointer;
-                            }
-                            .print-toolbar .btn-print {
-                                background-color: #3498db;
-                                color: #ffffff;
-                            }
-                            .print-toolbar .btn-print:hover {
-                                background-color: #2980b9;
-                            }
-                            .print-toolbar .btn-close {
-                                background-color: #e74c3c;
-                                color: #ffffff;
-                            }
-                            .print-toolbar .btn-close:hover {
-                                background-color: #c0392b;
-                            }
-                            @media print {
-                                .print-toolbar {
-                                    display: none !important;
-                                }
-                            }
                         </style>
                     `;
                     htmlContent += '</head><body class="print-view-body">';
-                    htmlContent += `
-                        <div class="print-toolbar">
-                            <button type="button" class="btn-print" onclick="window.print()">🖨️ প্রিন্ট করুন</button>
-                            <button type="button" class="btn-close" onclick="window.close()">✕ বন্ধ করুন</button>
-                        </div>
-                    `;
 
                     // 3. টেবিল হেডার (thead) এর HTML তৈরি
                     let tableHeaderHtml = '<thead><tr>';
@@ -1091,7 +968,7 @@
                     });
 
                     let tableBodyHtml = '<tbody>';
-                    rowsForPrint.forEach((row, rowIndex) => {
+                    currentDataRows.forEach((row, rowIndex) => {
                         let rowClass = row.classList.contains('highlight-ok') ? ' highlight-ok' : '';
                         let isDuplicate = row.cells[2].classList.contains('highlight-invoice-duplicate'); 
                         
@@ -1124,10 +1001,6 @@
                                     const originalRowItem = originalData.find(item => item.originalIndex === originalRowIndex);
                                     if (originalRowItem) {
                                         let cellContent = String(originalRowItem.data[originalColIndex] || '');
-                                        if (key === 'Date') {
-                                            const parsedDate = parseDateString(originalRowItem.data[originalColIndex]);
-                                            cellContent = parsedDate ? formatDateForDisplay(parsedDate) : cellContent;
-                                        }
                                         if (key === 'Invoice No' && duplicateInvoices.has(cellContent.trim())) {
                                             const highlightStyle = 'background-color: #fffacd !important; font-weight: bold;';
                                             tableBodyHtml += `<span style="${highlightStyle}">${cellContent}</span>`;
@@ -1189,8 +1062,14 @@
                     }
 
                     printWindow.document.write(htmlContent);
-                    printWindow.document.close();
-                    // এখন উইন্ডোটি শুধু প্রিভিউ হিসেবে খোলা থাকবে; উপরের বাটনে ক্লিক করলে প্রিন্ট ডায়ালগ খুলবে
+                    printWindow.document.close(); 
+                    
+                    // প্রিন্ট ডায়ালগ খোলা
+                    printWindow.print();
+                    
+                    setTimeout(function() {
+                        printWindow.close();
+                    }, 100); 
                 } catch (error) {
                     showStatusMessage(`প্রিন্ট ফাংশনে ত্রুটি: ${error.message}. অনুগ্রহ করে Console চেক করুন।`, true);
                     console.error("Print Error:", error);
@@ -1198,12 +1077,11 @@
             }
             // --- End Reverted Print Function ---
 
-            function buildStatusSelect(cellData, originalRowIndex, originalColIndex) {
+            // STATUS কলামের জন্য এডিটেবল ড্রপডাউন তৈরি করে
+            function buildStatusSelect(cellData, trimmedLowercasedCellData, originalRowIndex, originalColIndex) {
                 const selectElement = document.createElement('select');
                 selectElement.dataset.originalRowIndex = originalRowIndex;
                 selectElement.dataset.originalColIndex = originalColIndex;
-
-                const trimmedLowercasedCellData = String(cellData || '').trim().toLowerCase();
 
                 let currentOptions = [...statusEditableOptions];
                 if (trimmedLowercasedCellData !== 'ok' && trimmedLowercasedCellData !== '') {
@@ -1211,7 +1089,6 @@
                         currentOptions.push(cellData);
                     }
                 }
-
                 currentOptions.sort((a, b) => {
                     const aLower = String(a).toLowerCase();
                     const bLower = String(b).toLowerCase();
@@ -1221,7 +1098,6 @@
                     if (b === '') return 1;
                     return aLower.localeCompare(bLower);
                 });
-
                 currentOptions.forEach(optionText => {
                     const option = document.createElement('option');
                     option.value = optionText;
@@ -1278,7 +1154,7 @@
                         row.classList.add('highlight-ok');
                     }
                     
-                    const displayOrder = [0, 7, 10, 2, 4, 5, 8, 9, 6, 1, 3]; 
+                    const displayOrder = [7, 10, 0, 2, 4, 5, 8, 9, 6, 1, 3]; 
 
                     displayOrder.forEach(originalColIndex => {
                         const rawCellData = rowData[originalColIndex];
@@ -1294,28 +1170,26 @@
                             const trimmedLowercasedCellData = cellData.trim().toLowerCase();
 
                             if (trimmedLowercasedCellData === 'ok') {
+                                // OK থাকলে টিক মার্ক দেখাবে; ডাবল-ক্লিক করলে আবার এডিট মোডে ড্রপডাউন আসবে
                                 cell.innerHTML = '<span class="tick-mark">✓</span>';
-                                cell.classList.add('status-ok-cell');
+                                cell.classList.add('status-display-cell');
                                 cell.title = 'পরিবর্তন করতে ডাবল-ক্লিক করুন';
                                 cell.addEventListener('dblclick', function() {
                                     alert('STATUS এডিট মোড চালু হয়েছে। নতুন স্ট্যাটাস নির্বাচন করুন।');
                                     cell.innerHTML = '';
-                                    cell.classList.remove('status-ok-cell');
+                                    cell.classList.remove('status-display-cell');
                                     cell.classList.add('editable-cell');
-                                    cell.appendChild(buildStatusSelect(cellData, originalRowIndex, originalColIndex));
+                                    const selectEl = buildStatusSelect(cellData, trimmedLowercasedCellData, originalRowIndex, originalColIndex);
+                                    selectEl.value = ''; // এডিট মোডে খালি "Select Status" দেখাবে
+                                    selectEl.querySelectorAll('option').forEach(opt => { opt.selected = (opt.value === ''); });
+                                    cell.appendChild(selectEl);
+                                    selectEl.focus();
                                 });
                             }
                             else {
+                                // OK না হলে সরাসরি ড্রপডাউন দেখাবে (ডাবল-ক্লিক লাগবে না)
                                 cell.classList.add('editable-cell');
-                                cell.appendChild(buildStatusSelect(cellData, originalRowIndex, originalColIndex));
-                            }
-                        }
-                        else if (originalColIndex === 4) {
-                            // Date কলাম: ভিন্ন ভিন্ন সোর্স থেকে আসা ফরম্যাট পার্স করে একই স্ট্যান্ডার্ড ফরম্যাটে দেখানো হয়
-                            const parsedDate = parseDateString(rawCellData);
-                            cell.textContent = parsedDate ? formatDateForDisplay(parsedDate) : (cellData || '—');
-                            if (!parsedDate && cellData) {
-                                cell.title = 'তারিখের ফরম্যাট চেনা যায়নি, মূল মান দেখানো হচ্ছে';
+                                cell.appendChild(buildStatusSelect(cellData, trimmedLowercasedCellData, originalRowIndex, originalColIndex));
                             }
                         }
                         else {
@@ -1327,12 +1201,9 @@
                 dataTable.style.display = 'table';
             }
 
-            // --- ডেটা সিঙ্ক: fetch() দিয়ে প্রতি ১৫ সেকেন্ডে পোলিং (EventSource/SSE ছাড়া) ---
+            // --- রিয়েল-টাইম সিঙ্ক (Firebase REST API স্ট্রিমিং, Server-Sent Events) ---
             let firebaseDataMap = {}; // Firebase key -> row object, লোকাল মিরর
-            const POLL_INTERVAL_MS = 15000; // ১৫ সেকেন্ড
-            let pollTimer = null;
-            let isFetching = false;
-            let hasLoadedOnce = false;
+            let realtimeEventSource = null;
 
             function rebuildOriginalDataFromMap() {
                 const items = Object.keys(firebaseDataMap).map(key => ({
@@ -1341,6 +1212,34 @@
                 }));
                 originalData = items;
                 originalData.sort(customSort);
+            }
+
+            // Firebase থেকে আসা 'put' (সম্পূর্ণ প্রতিস্থাপন) বা 'patch' (আংশিক আপডেট) ইভেন্ট লোকাল মিররে প্রয়োগ করে
+            function applyRealtimeEvent(eventType, pathStr, data) {
+                if (pathStr === '/') {
+                    if (eventType === 'put') {
+                        firebaseDataMap = data || {};
+                    } else if (data) {
+                        Object.keys(data).forEach(key => {
+                            if (data[key] === null) {
+                                delete firebaseDataMap[key];
+                            } else {
+                                firebaseDataMap[key] = { ...(firebaseDataMap[key] || {}), ...data[key] };
+                            }
+                        });
+                    }
+                } else {
+                    const key = pathStr.replace(/^\//, '').split('/')[0];
+                    if (eventType === 'put') {
+                        if (data === null) {
+                            delete firebaseDataMap[key];
+                        } else {
+                            firebaseDataMap[key] = data;
+                        }
+                    } else if (data) {
+                        firebaseDataMap[key] = { ...(firebaseDataMap[key] || {}), ...data };
+                    }
+                }
             }
 
             function refreshUIFromLocalData(isInitialLoad) {
@@ -1360,50 +1259,42 @@
                 }
             }
 
-            async function fetchDataOnce() {
-                // কোনো ড্রপডাউন এডিট/সেভ চলাকালীন বা আগের ফেচ শেষ না হলে স্কিপ করা হবে,
-                // যাতে ইউজারের কাজের মাঝখানে টেবিল রিফ্রেশ হয়ে বিঘ্ন না ঘটায়
-                if (isFetching || document.querySelector('.editable-cell select:disabled')) {
-                    return;
-                }
-                isFetching = true;
+            function startRealtimeSync() {
+                let receivedInitialData = false;
                 try {
-                    const response = await fetch(firebaseUrl(''));
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status);
-                    }
-                    const data = await response.json();
-                    firebaseDataMap = data || {};
-                    refreshUIFromLocalData(!hasLoadedOnce);
-                    hasLoadedOnce = true;
+                    realtimeEventSource = new EventSource(firebaseUrl(''));
+
+                    realtimeEventSource.addEventListener('put', function(e) {
+                        try {
+                            const parsed = JSON.parse(e.data);
+                            applyRealtimeEvent('put', parsed.path, parsed.data);
+                            refreshUIFromLocalData(!receivedInitialData);
+                            receivedInitialData = true;
+                        } catch (err) {
+                            console.error('Realtime put parse error:', err);
+                        }
+                    });
+
+                    realtimeEventSource.addEventListener('patch', function(e) {
+                        try {
+                            const parsed = JSON.parse(e.data);
+                            applyRealtimeEvent('patch', parsed.path, parsed.data);
+                            refreshUIFromLocalData(false);
+                        } catch (err) {
+                            console.error('Realtime patch parse error:', err);
+                        }
+                    });
+
+                    realtimeEventSource.onerror = function(err) {
+                        console.error('Firebase realtime stream error:', err);
+                        if (!receivedInitialData) {
+                            handleError({ message: 'রিয়েল-টাইম সংযোগ স্থাপন করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।' });
+                        }
+                    };
                 } catch (err) {
-                    console.error('ডেটা ফেচ করতে সমস্যা হয়েছে:', err);
-                    if (!hasLoadedOnce) {
-                        handleError({ message: 'ডেটা লোড করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।' });
-                    }
-                    // পরবর্তী চক্রে আবার চেষ্টা হবে, ততক্ষণ বিদ্যমান ডেটা দেখানো থাকবে
-                } finally {
-                    isFetching = false;
+                    handleError(err);
                 }
             }
-
-            function startAutoRefresh() {
-                if (pollTimer) clearInterval(pollTimer);
-                pollTimer = setInterval(fetchDataOnce, POLL_INTERVAL_MS);
-            }
-
-            // ট্যাব ব্যাকগ্রাউন্ডে গেলে পোলিং বন্ধ, সামনে ফিরলে সাথে সাথে রিফ্রেশ করে আবার শুরু (রিসোর্স সাশ্রয়ের জন্য)
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    if (pollTimer) {
-                        clearInterval(pollTimer);
-                        pollTimer = null;
-                    }
-                } else {
-                    fetchDataOnce();
-                    startAutoRefresh();
-                }
-            });
 
             async function handleDropdownChange(event) {
                 const changedSelect = event.target;
@@ -1436,10 +1327,6 @@
                         }
                         showStatusMessage('ডেটা সফলভাবে আপডেট করা হয়েছে।', false);
                         originalRowItem.data[originalColIndex] = newValue;
-                        // লোকাল মিরর-ও সিঙ্কে রাখা হচ্ছে যাতে পরবর্তী রিফ্রেশে পুরনো মান দেখা না যায়
-                        if (firebaseDataMap[originalRowIndex]) {
-                            firebaseDataMap[originalRowIndex][fieldName] = newValue;
-                        }
                         originalData.sort(customSort);
                         filterTable();
                     } catch (error) {
@@ -1514,8 +1401,7 @@
             }
 
             window.onload = function() {
-                fetchDataOnce();
-                startAutoRefresh();
+                startRealtimeSync();
 
                 const filterInputs = document.querySelectorAll('.filter-input');
                 filterInputs.forEach(input => {
